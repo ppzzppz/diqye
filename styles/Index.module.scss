@@ -1,0 +1,16 @@
+@import "styles/util.scss";
+
+.index{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  .link{
+    color: $link;
+    cursor: pointer;
+  }
+  .warp {
+    .link {
+      color: red;
+    }
+  }
+}
