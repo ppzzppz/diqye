@@ -19,5 +19,5 @@ export default config({
   // test
 })({
   // prod
-  shareApi: "ws://www.diqye.com/api/share-text"
+  shareApi: "ws://www.diqye.com:8899/share-text"
 });
