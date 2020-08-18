@@ -1,0 +1,11 @@
+@import "styles/util.scss";
+
+.share{
+  text-align: center;
+  textarea{
+    width: 90vw;
+    height: 100vh;
+    font-size: 16px;
+    padding: 20px;
+  }
+}
