@@ -1,11 +1,12 @@
 import Head from "next/head"
-import {useEffect,useState, Dispatch, SetStateAction, ChangeEvent} from "react"
+import {useEffect,useState,  ChangeEvent} from "react"
 import Styles from "styles/share.module.scss";
+import config from "@/config";
 
 let oneConn = (conn:(WebSocket|undefined)) => async ():Promise<WebSocket> => {
   if(conn == null){
     return new Promise((resolve,reject)=>{
-      conn = new WebSocket("ws://localhost:8899/share-text");
+      conn = new WebSocket(config.shareApi);
       conn.onopen = _ =>{
         resolve(conn)
       }
