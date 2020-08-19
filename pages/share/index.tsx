@@ -1,69 +1,95 @@
 import Head from "next/head"
-import {useEffect,useState,  ChangeEvent} from "react"
+import {useEffect,useState,  ChangeEvent, useRef, MutableRefObject} from "react"
 import Styles from "styles/share.module.scss";
-import config from "@/config";
+import { keepAlive, createConn, CallFn, MessageSent } from "@/kit/Connection";
 
-let oneConn = (conn:(WebSocket|undefined)) => async ():Promise<WebSocket> => {
-  if(conn == null){
-    return new Promise((resolve,reject)=>{
-      conn = new WebSocket(config.shareApi);
-      conn.onopen = _ =>{
-        resolve(conn)
-      }
-      conn.onerror = reject
-    })
-  }else{
-    return conn;
-  }
+
+type Typing = "Typing" | "Saved" | "Insteaded" | "Connecting"
+
+
+let sendMsg:CallFn<MessageSent>|null = null
+let timer: number | undefined
+let afterSend = (fn:CallFn<void>) => {
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+    fn();
+  }, 1000) as any;
 }
-let fetchConn = oneConn(undefined);
-
-let useTextContent = ():[string,((a:string,cursor:ChangeEvent<HTMLTextAreaElement>) => void)] => {
+let useTextContent = 
+  ():[
+    string,
+    MutableRefObject<HTMLTextAreaElement|undefined>,
+    Typing,
+    ((a:string,cursor:ChangeEvent<HTMLTextAreaElement>) => void)
+  ] => {
   let [content,setContent] = useState("Nothing");
-  let conn:null|WebSocket = null;
-  let positionOfcursor = 0
-  let target:null|EventTarget & HTMLTextAreaElement = null;
+  let [typing,setTyping] = useState<Typing>("Connecting");
+  let textarea = useRef<HTMLTextAreaElement>()
+  // let target:null|EventTarget & HTMLTextAreaElement = null;
   useEffect(()=>{
-    fetchConn().then(oconn=>{
-      conn = oconn
-      conn.onmessage = e =>{
-        let [_,content] = JSON.parse(e.data)
-        setContent(content)
-        if(target){
-          target.selectionEnd = positionOfcursor
+    document.body.className = "share-body"
+    let closeConn:CallFn<void>|null = null
+    keepAlive(createConn,{
+      onConnecting:()=>{
+        setTyping("Connecting")
+      },
+      onOpened: () => {
+        textarea.current?.focus();
+      },
+      onmessage: e =>{
+        let [code,msg] = JSON.parse(e.data)
+        if(code == 0){
+          setContent(msg)
+          setTyping("Insteaded")
         }
-      }
-      conn.onerror = e => {
-        setContent("Error! please reload the page")
+      },
+      logicSent:(send,close)=>{
+        closeConn = close
+        sendMsg = send
       }
     })
     return () =>{
-      if(conn){
-        // conn.close()
-      }
+      closeConn&&closeConn();
+      document.body.className = ""
     }
-  })
-  return [content, (a,e) => {
-    if(conn?.readyState == WebSocket.OPEN){
-      positionOfcursor = e.target.selectionEnd
-      target = e.target
-      conn?.send(JSON.stringify([0,a]))
-    }else{
-      setContent("Error! please reload the page")
+  },[])
+
+  return [
+    content, 
+    textarea,
+    typing,
+    (a,e) => {
+    setContent(a);
+    if(typing != "Typing"){
+      setTyping("Typing");
     }
-  }];
+    afterSend(()=>{
+        if(sendMsg){
+          sendMsg(JSON.stringify([0,a]))
+          setTyping("Saved")
+        }else{
+          void null
+        }
+    })
+  }]
 }
 
+
 export default function Share(){
-  let [content,setContent] = useTextContent();
+  let [content,textarea,typing,setContent] = useTextContent();
   return (
-    <div className={Styles.share}>
-      <Head>
-        <title>Share</title>
-      </Head>
-      <textarea
-      onChange={e=>setContent(e.target.value,e)}
-      value={content}></textarea>
-    </div>
+      <div className={Styles.share}>
+        <Head>
+          <title>Online Text Share | Diqye</title>
+        </Head>
+        <h3 className={Styles[typing]}>{typing}</h3>
+        <div className={Styles.shareArea}>
+          <textarea
+          ref={textarea as MutableRefObject<HTMLTextAreaElement>}
+          readOnly={typing == "Connecting"}
+          onChange={e=>setContent(e.target.value,e)}
+          value={content}></textarea>
+        </div>
+      </div>
   )
 }

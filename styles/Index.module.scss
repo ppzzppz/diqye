@@ -1,16 +1,28 @@
 @import "styles/util.scss";
 
 .index{
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  .link{
-    color: $link;
-    cursor: pointer;
+  header{
+    font-size: 24px;
+    text-align: center;
+    padding: 40px;
   }
-  .warp {
-    .link {
-      color: red;
+  .block1{
+    background: #003333;
+    font-size: 24px;
+    text-align: center;
+    color: #316ccb;
+    height: 40vh;
+    line-height: 100%;
+    p{
+      color: white;
+      font-size: 18px;
     }
+    padding: 40px;
+  }
+  footer{
+    background: #999966;
+    font-size: 12px;
+    text-align: center;
+    padding: 40px;
   }
 }
