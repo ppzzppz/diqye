@@ -4,7 +4,7 @@ import Styles from "styles/share.module.scss";
 import { keepAlive, createConn, CallFn, MessageSent } from "@/kit/Connection";
 
 
-type Typing = "Typing" | "Saved" | "Insteaded" | "Connecting"
+type Typing = "Typing" | "Saved" | "Insteaded" | "Connecting" | "Saving"
 
 
 let sendMsg:CallFn<MessageSent>|null = null
@@ -41,6 +41,8 @@ let useTextContent =
         if(code == 0){
           setContent(msg)
           setTyping("Insteaded")
+        } else if(code == 700){
+          setTyping("Saved")
         }
       },
       logicSent:(send,close)=>{
@@ -66,7 +68,7 @@ let useTextContent =
     afterSend(()=>{
         if(sendMsg){
           sendMsg(JSON.stringify([0,a]))
-          setTyping("Saved")
+          setTyping("Saving")
         }else{
           void null
         }
