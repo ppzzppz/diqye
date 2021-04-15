@@ -1,8 +1,9 @@
 import config from "@/config"
+import { create } from "domain"
 
 export function createConn():Promise<WebSocket>{
   return new Promise((resolve,reject)=>{
-    let conn = new WebSocket(config.shareApi)
+    let conn = new WebSocket(config.shareApi())
     conn.onopen = _ =>{
       resolve(conn)
     }
@@ -18,6 +19,16 @@ type ConnedParm = {
   logicSent:(send:CallFn<MessageSent>,close:CallFn<void>)=>any
 }
 export async function keepAlive(createFn:()=>Promise<WebSocket>,param:ConnedParm){
+  try{
+    await keepAlive_(createFn,param)
+  }catch(e){
+    console.log("conn","Creating Error and will retry in 2s",e)
+    setTimeout(()=>{
+      keepAlive(createFn,param)
+    },2000)
+  }
+}
+export async function keepAlive_(createFn:()=>Promise<WebSocket>,param:ConnedParm){
   let conn = await createFn();
   let realClose = false
   conn.onmessage = param.onmessage

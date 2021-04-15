@@ -1,7 +1,10 @@
 const prod = process.env.NODE_ENV === 'production'
 
 let base = {
-  shareApi: "ws://localhost:8899/share-text"
+  // shareApi: "ws://hk.com/hs/share-text"
+  shareApi() {
+    return  "ws://" + location.host + "/hs/share-text"
+  } 
 }
 
 let config = (dev:Partial<typeof base>) => 
@@ -15,9 +18,11 @@ let config = (dev:Partial<typeof base>) =>
 
 export default config({
   // dev
+  shareApi(){
+    return "ws://hk.com/hs/share-text"
+  }
 })({
   // test
 })({
   // prod
-  shareApi: "ws://www.diqye.com:8899/share-text"
 });

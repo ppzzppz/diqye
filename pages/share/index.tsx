@@ -4,16 +4,19 @@ import Styles from "styles/share.module.scss";
 import { keepAlive, createConn, CallFn, MessageSent } from "@/kit/Connection";
 
 
-type Typing = "Typing" | "Saved" | "Insteaded" | "Connecting" | "Saving"
+type Typing = "Typing" | "Sent" | "Merged" | "Connecting" | "Sending"
 
 
 let sendMsg:CallFn<MessageSent>|null = null
+let mergeContent = (a:string,b:string) => {
+  return b
+}
 let timer: number | undefined
 let afterSend = (fn:CallFn<void>) => {
   clearTimeout(timer);
   timer = setTimeout(() => {
     fn();
-  }, 1000) as any;
+  }, 800) as any;
 }
 let useTextContent = 
   ():[
@@ -22,7 +25,7 @@ let useTextContent =
     Typing,
     ((a:string,cursor:ChangeEvent<HTMLTextAreaElement>) => void)
   ] => {
-  let [content,setContent] = useState("Nothing");
+  let [content,setContent] = useState("");
   let [typing,setTyping] = useState<Typing>("Connecting");
   let textarea = useRef<HTMLTextAreaElement>()
   // let target:null|EventTarget & HTMLTextAreaElement = null;
@@ -39,10 +42,10 @@ let useTextContent =
       onmessage: e =>{
         let [code,msg] = JSON.parse(e.data)
         if(code == 0){
-          setContent(msg)
-          setTyping("Insteaded")
+          setContent(mergeContent(content,msg))
+          setTyping("Merged")
         } else if(code == 700){
-          setTyping("Saved")
+          setTyping("Sent")
         }
       },
       logicSent:(send,close)=>{
@@ -68,7 +71,7 @@ let useTextContent =
     afterSend(()=>{
         if(sendMsg){
           sendMsg(JSON.stringify([0,a]))
-          setTyping("Saving")
+          setTyping("Sending")
         }else{
           void null
         }
@@ -82,7 +85,7 @@ export default function Share(){
   return (
       <div className={Styles.share}>
         <Head>
-          <title>Online Text Share | Diqye</title>
+          <title>Online sharing text | Diqye</title>
         </Head>
         <h3 className={Styles[typing]}>{typing}</h3>
         <div className={Styles.shareArea}>
