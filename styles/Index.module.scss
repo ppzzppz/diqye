@@ -1,28 +1,27 @@
 @import "styles/util.scss";
 
 .index{
-  header{
-    font-size: 24px;
-    text-align: center;
-    padding: 40px;
-  }
-  .block1{
-    background: #003333;
-    font-size: 24px;
-    text-align: center;
-    color: #316ccb;
-    height: 40vh;
-    line-height: 100%;
-    p{
-      color: white;
-      font-size: 18px;
+  color: #fff;
+  line-height: 1.5;
+  display: flex;
+  flex-flow: wrap;
+  justify-content: center;
+  align-content: center;
+  height: 100vh;
+  .item{
+    width: 120px;
+    height: 80px;
+    border-radius: 20px;
+    background: #141414;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: not-allowed;
+    box-shadow: 0px 0px 0px 1px #6664;
+    margin: 20px;
+    &.active{
+      color: #316ccb;
+      cursor: pointer;
     }
-    padding: 40px;
-  }
-  footer{
-    background: #999966;
-    font-size: 12px;
-    text-align: center;
-    padding: 40px;
   }
 }

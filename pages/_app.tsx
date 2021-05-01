@@ -8,6 +8,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     <>
       <Head>
         <title>Webside of Diqye</title>
+        <meta data-n-head="ssr" name="viewport" content="width=device-width,initial-scale=1"></meta>
       </Head>
       <Component {...pageProps} />
     </>
