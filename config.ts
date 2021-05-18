@@ -3,7 +3,11 @@ const prod = process.env.NODE_ENV === 'production'
 let base = {
   // shareApi: "ws://hk.com/hs/share-text"
   shareApi() {
-    return  "ws://" + location.host + "/hs/share-text"
+    let protocol = {
+      "http:": "ws://",
+      "https:": "wss://"
+    }
+    return  (protocol[location.protocol as ("http:"|"https:")] || "ws://") + location.host + "/hs/share-text"
   } 
 }
 
